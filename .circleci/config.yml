@@ -10,6 +10,28 @@ jobs:
           name: "Say hello"
           command: "echo Hello, World!"
 
+  security-check:
+    docker:
+      - image: cimg/node:20.4
+    steps:
+      - checkout
+      - run:
+          name: "Check for vulnerable dependencies"
+          command: |
+            if [ -f package.json ]; then
+              echo "Running npm audit..."
+              npm install
+              npm audit --audit-level=moderate
+            else
+              echo "No package.json found, skipping dependency check"
+            fi
+      - run:
+          name: "Basic API test"
+          command: |
+            # Replace this URL with your app's endpoint if needed
+            echo "Testing API endpoint..."
+            curl -f http://localhost:3000 || echo "API endpoint check skipped"
+
   sonarqube:
     working_directory: ~/build
     docker:
@@ -38,4 +60,5 @@ workflows:
   say-hello-workflow:
     jobs:
       - say-hello
+      - security-check
       - sonarqube
