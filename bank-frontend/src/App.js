@@ -1,94 +1,65 @@
 import React, { useState } from "react";
 import Login from "./Login";
-import Payment from "./Payment"; 
+import Payment from "./Payment";
 
 function App() {
-  const [page, setPage] = useState("login"); // default page
+  const [page, setPage] = useState("login");
+  const [currentUser, setCurrentUser] = useState(null);
 
-  // Render page
+  const handleLoginSuccess = (user) => {
+    setCurrentUser(user);
+    setPage("payment");
+  };
+
   const renderPage = () => {
     switch (page) {
-      case "register":
-        return <Register />;
       case "login":
-        return <Login />;
+        return <Login onLoginSuccess={handleLoginSuccess} />;
       case "payment":
+        if (!currentUser)
+          return (
+            <p style={{ textAlign: "center", marginTop: "50px" }}>
+              Please log in first
+            </p>
+          );
         return <Payment />;
       default:
-        return <Login />;
+        return <Login onLoginSuccess={handleLoginSuccess} />;
     }
   };
 
-  return (
+  // Style for the top buttons
+  const buttonStyle = 
+  {
+    margin: "0 10px",
+    padding: "10px 20px",
+    backgroundColor: "#4CAF50",
+    color: "white",
+    border: "none",
+    borderRadius: "5px",
+    cursor: "pointer",
+    fontWeight: "bold",
+  };
+
+  const buttonContainerStyle = 
+  {
+    textAlign: "center",
+    marginTop: "20px",
+    marginBottom: "20px",
+  };
+
+  return 
+  (
     <div>
-      {/* Navigation buttons */}
-      <div style={{ textAlign: "center", marginTop: "20px" }}>
-        <button onClick={() => setPage("register")}>Register</button>
-        <button onClick={() => setPage("login")}>Login</button>
-        <button onClick={() => setPage("payment")}>Payment</button>
+      <div style={buttonContainerStyle}>
+        <button style={buttonStyle} onClick={() => setPage("login")}>
+          Login
+        </button>
+        <button style={buttonStyle} onClick={() => setPage("payment")}>
+          Payment
+        </button>
       </div>
-
-      {/* Page content */}
       {renderPage()}
-    </div>
-  );
-}
-
-// Register
-function Register() {
-  const [fullName, setFullName] = useState("");
-  const [idNumber, setIdNumber] = useState("");
-  const [accountNumber, setAccountNumber] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
-
-  const handleRegister = async () => {
-    try {
-      const res = await fetch("https://localhost:3001/api/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullName, idNumber, accountNumber, password }),
-      });
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        setMessage(`Error: ${errorText}`);
-        return;
-      }
-
-      const text = await res.text();
-      setMessage(text);
-    } catch (err) {
-      setMessage(`Error connecting to server: ${err.message}`);
-    }
-  };
-
-  return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h1>Customer Registration</h1>
-      <input
-        placeholder="Full Name"
-        value={fullName}
-        onChange={(e) => setFullName(e.target.value)}
-      /><br /><br />
-      <input
-        placeholder="ID Number"
-        value={idNumber}
-        onChange={(e) => setIdNumber(e.target.value)}
-      /><br /><br />
-      <input
-        placeholder="Account Number"
-        value={accountNumber}
-        onChange={(e) => setAccountNumber(e.target.value)}
-      /><br /><br />
-      <input
-        placeholder="Password"
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-      /><br /><br />
-      <button onClick={handleRegister}>Register</button>
-      <p>{message}</p>
     </div>
   );
 }
